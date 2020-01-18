@@ -10,27 +10,32 @@ def write():
     file.write(search.lyrics)
     file.close()
 
-def search():
+def search(url=None):
     
-    # Asks for name and artist and opens url
-    search.name = input('What is the name of your song? ')
-    name = search.name.replace(' ', '').lower()
-    name = str(name)
-    artist = input('Who is the artist of your song? ').lower()
-    artist = artist.replace(' ', '')
-    yn = False
-    yesno = input("Would you like to print the lyrics to a file? (y/n) ")
-    validchar = ['y', 'n']
+    if url == None:
+        # Asks for name and artist and opens url
+        search.name = input('What is the name of your song? ')
+        name = search.name.replace(' ', '').lower()
+        name = str(name)
+        artist = input('Who is the artist of your song? ').lower()
+        artist = artist.replace(' ', '')
+        yn = False
+        yesno = input("Would you like to print the lyrics to a file? (y/n) ")
+        validchar = ['y', 'n']
 
-    #  Validates answer
-    while not yn:
-        if yesno not in validchar:
-            yesno = input("'%s' is an invalid input. Try again. (y/n) " % (yesno)) 
+        #  Validates answer
+        while not yn:
+            if yesno not in validchar:
+                yesno = input("'%s' is an invalid input. Try again. (y/n) " % (yesno)) 
 
-        elif yesno in validchar:
-            yn = True
+            elif yesno in validchar:
+                yn = True
 
-    search.url = 'https://azlyrics.com/lyrics/%s/%s.html' % (artist, name)
+        search.url = 'https://azlyrics.com/lyrics/%s/%s.html' % (artist, name)
+
+    else: 
+        search.url = url 
+
     search.source = requests.get(search.url).text
 
     soup = BeautifulSoup(search.source, 'lxml')
@@ -64,25 +69,35 @@ def search():
         search.artist = artist
         search.query = "'%s' by '%s'" % (search.songname, search.artist)
 
-def find():
-    query = 'this by that'.split()
+def find(searchterm):
+    query = searchterm.split()
     queryinlink = '+'.join(query)
     newurl = 'https://search.azlyrics.com/search.php?q=%s' % (queryinlink)
-    print(newurl)
     newsource = requests.get(newurl).text
     newsoup = BeautifulSoup(newsource, 'lxml')
     topfive = newsoup.find_all('td', class_='text-left visitedlyr', limit = 5)
     keys = ['1', '2', '3', '4', '5']
     values = []
+    urls = []
     for song in topfive:
         values.append('%s by %s' % (song.a.b.text, song.a.b.next_element.next_element.next_element.text))
-    # values = 
-    print(values)
-    # print(topfiveartists)
+        urls.append(song.a['href'])
+
+    options = {k:v for k,v in zip(keys, values)}
+    
+    for key, value in options.items():
+        print('%s : %s' % (key, value))
+
+    print(urls)
+    selection = input('Please choose one of the options with a number from 1-5. ')
+
+    while selection not in keys:
+        selection = input('Please choose one of the options with a number from 1-5.')
+
+    search(urls[int(selection) - 1])
 
 
-
-find()
+find('this by that')
 
 
 # # Runs search()
