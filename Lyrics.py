@@ -62,24 +62,46 @@ def search():
         search.again = 'n'
         search.songname = search.name
         search.artist = artist
+        search.query = "'%s' by '%s'" % (search.songname, search.artist)
 
-# Runs search()
-search()
-while search.again == 'y':
-    search()
+def find():
+    query = 'this by that'.split()
+    queryinlink = '+'.join(query)
+    newurl = 'https://search.azlyrics.com/search.php?q=%s' % (queryinlink)
+    print(newurl)
+    newsource = requests.get(newurl).text
+    newsoup = BeautifulSoup(newsource, 'lxml')
+    topfive = newsoup.find_all('td', class_='text-left visitedlyr', limit = 5)
+    keys = ['1', '2', '3', '4', '5']
+    values = []
+    for song in topfive:
+        values.append('%s by %s' % (song.a.b.text, song.a.b.next_element.next_element.next_element.text))
+    # values = 
+    print(values)
+    # print(topfiveartists)
 
-while not search.valid:
-    answers = ['1', '2']
-    answer = input("Sorry we couldn't find '%s' by %s. Would you like to try another song [1]\nor quit [2]? " % (search.songname, search.artist))
-    while answer not in answers:
-        answer = input("Please use either 1 or 2 to answer. Would you like to try another song [1] or quit [2]? ")
 
-    if answer == '1':
-        search()
 
-    elif answer == '2':
-        break
+find()
 
-sys.exit()
+
+# # Runs search()
+# search()
+# while search.again == 'y':
+#     search()
+
+# while not search.valid:
+#     answers = ['1', '2']
+#     answer = input("Sorry we couldn't find %s. Would you like to try another song [1]\nor quit [2]? " % (search.query))
+#     while answer not in answers:
+#         answer = input("Please use either 1 or 2 to answer. Would you like to try another song [1] or quit [2]? ")
+
+#     if answer == '1':
+#         search()
+
+#     elif answer == '2':
+#         break
+
+# sys.exit()
 
 
