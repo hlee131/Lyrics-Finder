@@ -5,26 +5,26 @@ import sys
 
 def write():
     # Writes to file
-    with open('%s.txt' % (search.songname), 'w') as file:
-        file.write(search.header)
-        file.write(search.lyrics)
+    with open('%s.txt' % (scrape.songname), 'w') as file:
+        file.write(scrape.header)
+        file.write(scrape.lyrics)
 
-def search(url=None):
+def scrape(url=None):
     
-    search.url = url
+    scrape.url = url
 
-    search.source = requests.get(search.url).text
+    scrape.source = requests.get(scrape.url).text
 
-    soup = BeautifulSoup(search.source, 'lxml')
+    soup = BeautifulSoup(scrape.source, 'lxml')
 
     # Find song name and artist
     songname = soup.find_all('b')[1].text
-    search.songname = songname[1:-1]
+    scrape.songname = songname[1:-1]
     artist = soup.find('div', class_='col-xs-12 col-lg-8 text-center').find('div', class_='lyricsh').h2.text
-    search.artist = artist[:-7]
-    search.lyrics = soup.find('div', class_=None).text.strip()
-    search.header = '\n%s by %s \n' % (songname, artist)
-    search.valid = True
+    scrape.artist = artist[:-7]
+    scrape.lyrics = soup.find('div', class_=None).text.strip()
+    scrape.header = '\n%s by %s \n' % (songname, artist)
+    scrape.valid = True
 
     yesno = input('Would you like to write the lyrics to a file? (y/n) ')
     while yesno not in ['y', 'n']:
@@ -35,18 +35,18 @@ def search(url=None):
         write()
 
     # Prints lyrics
-    print(search.header)
-    print(search.lyrics +'\n')
+    print(scrape.header)
+    print(scrape.lyrics +'\n')
 
-    search.again = input('Would you like to try another song[1] or quit[2]? ')
+    scrape.again = input('Would you like to try another song[1] or quit[2]? ')
 
-    while search.again not in ['1', '2']:
-        search.again = input("'%s' is an invalid answer. Please try again. " % (search.again))
+    while scrape.again not in ['1', '2']:
+        scrape.again = input("'%s' is an invalid answer. Please try again. " % (scrape.again))
 
-    if search.again == '1':
+    if scrape.again == '1':
         start()
 
-    elif search.again == '2':
+    elif scrape.again == '2':
         sys.exit()
 
 def find(searchterm):
@@ -92,8 +92,7 @@ def find(searchterm):
         while selection not in keys:
             selection = input('Please choose one of the options with a number from 1-5.')
 
-        search(urls[int(selection) - 1])
-
+        scrape(urls[int(selection) - 1])
 
 def start():
     search = input('What song would you like to find the lyrics for today? ')
