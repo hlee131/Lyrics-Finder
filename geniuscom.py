@@ -50,16 +50,19 @@ def scrape(url=None):
         sys.exit()
 
 def find(searchterm):
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
     query = searchterm.split()
     queryinlink = '%20'.join(query)
     newurl = 'http://genius.com/search?q=%s' % (queryinlink)
-    newsource = requests.get(newurl).text
+    newsource = requests.get(newurl, headers=headers).text
     newsoup = BeautifulSoup(newsource, 'lxml')
-    panels = newsoup.find_all('div', {'ng-switch' : "$ctrl.section.type === 'album' || ($ctrl.section.type === 'top_hit' && $ctrl.section.hits[0].index === 'album')"}, limit = 5)
-    print(panels)
+    print(newsoup.prettify())
+    panels = newsoup.find_all('div', {'ng-switch' : "$ctrl.section.type === 'album' || ($ctrl.section.type === 'top_hit' && $ctrl.section.hits[0].index === 'album')"})
+    #print(panels)
 
-    ourpanel = panels[1]
-    topfive = ourpanel.find_all('div', {'ng-repeat' : 'hit in $ctrl.results | limitTo: $ctrl.limit_to'}, limit = 5)
+    topfive = panels[0].find_all('div', {'ng-repeat' : 'hit in $ctrl.results | limitTo: $ctrl.limit_to'}, limit = 5)
+
+    # print(topfive)
     
     keys = ['1', '2', '3', '4', '5']
     values = []
