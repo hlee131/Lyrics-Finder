@@ -1,12 +1,20 @@
+# We need Selenium because Genius is loaded with JavaScript
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import os
-import time
+import requests
+from bs4 import BeautifulSoup
+import sys 
 
 options = Options()
 options.headless = True
 chromepath = r'C:\Users\ha\Desktop\GitHub Projects\Lyrics Finder\chromedriver.exe'
 driver = webdriver.Chrome(chromepath, options=options)
+
+def write():
+    # Writes to file
+    with open('%s.txt' % (scrape.songname), 'w') as file:
+        file.write(scrape.header)
+        file.write(scrape.lyrics)
 
 def find(searchterm):
     query = searchterm.split()
@@ -18,15 +26,75 @@ def find(searchterm):
     songs = panels.find_elements_by_xpath(""".//div[@class='mini_card-title']""")
     artists = panels.find_elements_by_xpath(""".//div[@class='mini_card-subtitle']""")
 
-    keys = list(range(len(songs)))
+    keys = list(range(1, len(songs) + 1))
     values = []
+    urls = []
 
     for s, a in zip(songs, artists):
-        values.append('%s by %s' % (s, a))
+        values.append('%s by %s' % (s.text, a.text))
 
     options = {k:v for k,v in zip(keys, values)}
 
     for key, value in options.items():
         print('%s : %s' % (key, value))
+
+    if len(options) == 0:
+        answer = input("Sorry, we couldn't find anything for your search term, would you like to try another song[1],\nor quit[2]?")
+
+        if answer == '1':
+            start()
+
+        elif answer == '2':
+            sys.exit()
+    else:
+        selection = input('Please choose one of the options with a number from 1-5. ')
+
+        while selection not in keys:
+            selection = input('Please choose one of the options with a number from 1-5.')
+
+        scrape(urls[int(selection) - 1])
     
-find('mind is a prison')
+def scrape(url=None):
+    
+    scrape.url = url
+
+    scrape.source = requests.get(scrape.url).text
+
+    soup = BeautifulSoup(scrape.source, 'lxml')
+
+    # Find song name and artist
+    scrape.songname = soup.find('h1', class_='header_with_cover_art-primary_info-title').text
+    scrape.artist = soup.find('a', class_= 'header_with_cover_art-primary_info-primary_artist').text
+    lyrics = soup.find('div', class_= 'lyrics')
+    scrape.lyrics = lyrics.find('p').text
+    scrape.header = '%s by %s' % (scrape.songname, scrape.artist)
+    scrape.valid = True
+
+    yesno = input('Would you like to write the lyrics to a file? (y/n) ')
+    while yesno not in ['y', 'n']:
+        yesno = input("Please use either 'y' or 'n' ")
+
+    # Calls write only if user said yes
+    if yesno == 'y':
+        write()
+
+    # Prints lyrics
+    print(scrape.header + '\n')
+    print(scrape.lyrics +'\n')
+
+    scrape.again = input('Would you like to try another song[1] or quit[2]? ')
+
+    while scrape.again not in ['1', '2']:
+        scrape.again = input("'%s' is an invalid answer. Please try again. " % (scrape.again))
+
+    if scrape.again == '1':
+        start()
+
+    elif scrape.again == '2':
+        sys.exit()
+
+def start():
+    search = input('What song would you like to find the lyrics for today? ')
+    find(search)
+
+start()
