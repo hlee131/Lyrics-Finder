@@ -99,4 +99,5 @@ def start():
     search = input('What song would you like to find the lyrics for today? ')
     find(search)
 
-start()
+if __name__ == '__main__':
+    start()
