@@ -12,9 +12,9 @@ driver = webdriver.Chrome(chromepath, options=options)
 
 def write():
     # Writes to file
-    with open('%s.txt' % (scrape.songname), 'w') as file:
-        file.write(scrape.header)
-        file.write(scrape.lyrics)
+    with open('%s.txt' % (scrape.songname), 'w', encoding='utf-8') as file:
+        file.write(scrape.header + '\n')
+        file.write('\n' + scrape.lyrics)
 
 def find(searchterm):
     query = searchterm.split()
@@ -25,10 +25,12 @@ def find(searchterm):
     panels = driver.find_element_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]""")
     songs = panels.find_elements_by_xpath(""".//div[@class='mini_card-title']""")
     artists = panels.find_elements_by_xpath(""".//div[@class='mini_card-subtitle']""")
+    link = panels.find_elements_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]/search-result-items/div/search-result-item/div/mini-song-card/a""")
+    numoptions = len(songs)
 
-    keys = list(range(1, len(songs) + 1))
+    keys = list(range(1, numoptions + 1))
     values = []
-    urls = []
+    urls = [l.get_attribute("href") for l in link]
 
     for s, a in zip(songs, artists):
         values.append('%s by %s' % (s.text, a.text))
@@ -47,10 +49,10 @@ def find(searchterm):
         elif answer == '2':
             sys.exit()
     else:
-        selection = input('Please choose one of the options with a number from 1-5. ')
+        selection = int(input('Please choose one of the options with a number from 1-%s. ' % (str(numoptions))))
 
         while selection not in keys:
-            selection = input('Please choose one of the options with a number from 1-5.')
+            selection = int(input('Please choose one of the options with a number from 1-%s.' % (str(numoptions))))
 
         scrape(urls[int(selection) - 1])
     

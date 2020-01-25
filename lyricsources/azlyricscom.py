@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import lxml
 import requests
 import sys
+import os
 
 def write():
     # Writes to file
@@ -64,8 +65,9 @@ def find(searchterm):
         ourpanel = panels[0]
 
     topfive = ourpanel.find_all('td', class_='text-left visitedlyr', limit = 5)
+    numoptions = len(topfive)
     
-    keys = ['1', '2', '3', '4', '5']
+    keys = list(range(1, numoptions + 1))
     values = []
     urls = []
     for song in topfive:
@@ -87,10 +89,10 @@ def find(searchterm):
         elif answer == '2':
             sys.exit()
     else:
-        selection = input('Please choose one of the options with a number from 1-5. ')
+        selection = int(input('Please choose one of the options with a number from 1-%s. ' % (str(numoptions))))
 
         while selection not in keys:
-            selection = input('Please choose one of the options with a number from 1-5.')
+            selection = int(input('Please choose one of the options with a number from 1-%s.' % (str(numoptions))))
 
         scrape(urls[int(selection) - 1])
 
