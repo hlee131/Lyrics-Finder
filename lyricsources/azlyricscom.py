@@ -1,14 +1,34 @@
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import lxml
 import requests
 import sys
 import os
+
+def watch(searchterm):
+
+    options = Options()
+    options.headless = True
+    chromepath = os.getcwd() + r'\chromedriver.exe'
+    driver = webdriver.Chrome(chromepath, options=options)
+
+    search = searchterm.split()
+    search = '+'.join(search)
+    link = f'https://www.youtube.com/results?search_query={search}'
+
+    driver.get(link)
+    watch_at = driver.find_element_by_xpath("""/html/body/ytd-app/div/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/div/div[1]/div/h3/a""")
+    yt_link = watch_at.get_attribute('href')
+
+    return(yt_link)
 
 def write():
     # Writes to file
     with open('%s.txt' % (scrape.songname), 'w') as file:
         file.write(scrape.header)
         file.write(scrape.lyrics)
+        file.write(scrape.link)
 
 def scrape(url=None):
     
@@ -27,6 +47,9 @@ def scrape(url=None):
     scrape.header = '\n%s by %s \n' % (songname, artist)
     scrape.valid = True
 
+    scrape.link = watch(find.searchterm)
+    scrape.link = f'\n\nWatch now at: {scrape.link}'
+
     yesno = input('Would you like to write the lyrics to a file? (y/n) ')
     while yesno not in ['y', 'n']:
         yesno = input("Please use either 'y' or 'n' ")
@@ -36,8 +59,9 @@ def scrape(url=None):
         write()
 
     # Prints lyrics
-    print(scrape.header)
-    print(scrape.lyrics +'\n')
+    lyrics = scrape.header + scrape.lyrics + scrape.link + '\n'
+    print(lyrics)
+
 
     scrape.again = input('Would you like to try another song[1] or quit[2]? ')
 
@@ -51,6 +75,7 @@ def scrape(url=None):
         sys.exit()
 
 def find(searchterm):
+    find.searchterm = searchterm
     query = searchterm.split()
     queryinlink = '+'.join(query)
     newurl = 'https://search.azlyrics.com/search.php?q=%s' % (queryinlink)
@@ -63,6 +88,15 @@ def find(searchterm):
 
     elif len(panels) == 1:
         ourpanel = panels[0]
+
+    elif len(panels) == 0:
+        answer = input("Sorry, we couldn't find anything for your search term, would you like to try another song[1],\nor quit[2]? ")
+
+        if answer == '1':
+            start()
+
+        elif answer == '2':
+            sys.exit()
 
     topfive = ourpanel.find_all('td', class_='text-left visitedlyr', limit = 5)
     numoptions = len(topfive)
@@ -80,21 +114,15 @@ def find(searchterm):
     for key, value in options.items():
         print('%s : %s' % (key, value))
 
-    if len(options) == 0:
-        answer = input("Sorry, we couldn't find anything for your search term, would you like to try another song[1],\nor quit[2]?")
+    
+    selection = int(input('Please choose one of the options with a number from 1-%s. ' % (str(numoptions))))
 
-        if answer == '1':
-            start()
+    while selection not in keys:
+        selection = int(input('Please choose one of the options with a number from 1-%s.' % (str(numoptions))))
 
-        elif answer == '2':
-            sys.exit()
-    else:
-        selection = int(input('Please choose one of the options with a number from 1-%s. ' % (str(numoptions))))
+    find.selected = values[int(selection) - 1]
 
-        while selection not in keys:
-            selection = int(input('Please choose one of the options with a number from 1-%s.' % (str(numoptions))))
-
-        scrape(urls[int(selection) - 1])
+    scrape(urls[int(selection) - 1])
 
 def start():
     search = input('What song would you like to find the lyrics for today? ')
