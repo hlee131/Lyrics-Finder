@@ -10,6 +10,7 @@ def watch(searchterm):
 
     options = Options()
     options.headless = True
+    options.add_argument('--log-level=3')
     chromepath = os.getcwd() + r'\chromedriver.exe'
     driver = webdriver.Chrome(chromepath, options=options)
 

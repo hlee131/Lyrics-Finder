@@ -1,12 +1,4 @@
-# We need Selenium because Youtube is loaded with JavaScript
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import os 
-
-options = Options()
-options.headless = True
-chromepath = os.getcwd() + r'\chromedriver.exe'
-driver = webdriver.Chrome(chromepath, options=options)
+import sys
 
 lyric_source = input('Would you like to use azlyrics.com [1] or genius.com? [2] ')
 
@@ -18,23 +10,55 @@ def start():
     if lyric_source == '1':
         from lyricsources import azlyricscom
         search = input('What song would you like to find the lyrics for today? ')
-        azlyricscom.find(search)
+        result = directory(search)
+        if result == None:
+            azlyricscom.find(search)
+
+        else:
+            print('\n' + result)
+            again()
 
     elif lyric_source == '2':
         from lyricsources import geniuscom
         search = input('What song would you like to find the lyrics for today? ')
-        geniuscom.find(search)
+        result = directory(search)
+        if result == None:
+            geniuscom.find(search)
 
-def watch(searchterm):
-    search = searchterm.split()
-    search = '+'.join(search)
-    link = f'https://www.youtube.com/results?search_query={search}'
+        else:
+            print('\n' + result)
+            again()
 
-    driver.get(link)
-    watch_at = driver.find_element_by_xpath("""/html/body/ytd-app/div/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/div/div[1]/div/h3/a""")
-    yt_link = watch_at.get_attribute('href')
+def again():
+    again = input('\nWould you like to try another song[1] or quit[2]? ')
 
-    return(yt_link)
+    while again not in ['1', '2']:
+        again = input("'%s' is an invalid answer. Please try again. " % (again))
+
+    if again == '1':
+        start()
+
+    elif again == '2':
+        sys.exit()
+
+def directory(songname):
+    songname = songname.strip()
+    songname = songname.split()
+    songname = " ".join(songname)
+
+    filename = f'{songname}.txt'
+
+    try:
+        file = open(filename, 'r')
+
+    except:
+        return None
+
+    else:
+        lyrics = file.readlines()
+        lyrics = "".join(lyrics)
+        file.close()
+        return lyrics
 
 if __name__ == '__main__':
     start() 
