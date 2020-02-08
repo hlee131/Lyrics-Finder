@@ -15,7 +15,7 @@ driver = webdriver.Chrome(chromepath, options=options)
 def watch(searchterm):
 
     options = Options()
-    options.headless = True
+    options.headless = False
     options.add_argument("--log-level=3")
     chromepath = os.getcwd() + r'\chromedriver.exe'
     driver = webdriver.Chrome(chromepath, options=options)
@@ -41,6 +41,7 @@ def find(searchterm):
     query = searchterm.split()
     query = '%20'.join(query)
     query = 'http://genius.com/search?q=%s' % (query)
+    print(query)
     driver.get(query)
 
     panels = driver.find_element_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]""")
