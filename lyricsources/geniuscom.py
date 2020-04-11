@@ -1,19 +1,25 @@
-# We need Selenium because Genius is loaded with JavaScript
+"""Python script for the source genius.com 
+
+We need Selenium because Genius is loaded with JavaScript
+"""
+import sys
+import os 
+from pathlib import Path
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
-import sys
-import os 
+
 
 options = Options()
 options.headless = True
-chromepath = os.getcwd() + r'\chromedriver.exe'
+options.add_argument('--log-level=3')
+chromepath = str(Path(os.getcwd()).parent) + r'\chromedriver.exe'
 driver = webdriver.Chrome(chromepath, options=options)
 
-
 def watch(searchterm):
-
+    """Finds youtube link for song"""
     options = Options()
     options.headless = False
     options.add_argument("--log-level=3")
@@ -31,12 +37,13 @@ def watch(searchterm):
     return(yt_link)
 
 def write():
-    # Writes to file
+    """Writes lyrics to file if user chooses to do so"""
     with open('%s.txt' % (scrape.songname), 'w', encoding='utf-8') as file:
         file.write(scrape.header + '\n')
         file.write('\n' + scrape.lyrics)
 
 def find(searchterm):
+    """Searches genius.com for possible songs. For example, a search term can return many songs."""
     find.searchterm = searchterm
     query = searchterm.split()
     query = '%20'.join(query)
@@ -81,11 +88,9 @@ def find(searchterm):
         scrape(urls[int(selection) - 1])
     
 def scrape(url=None):
-    
+    """Finds the lyrics of the song selected in the find function"""
     scrape.url = url
-
     scrape.source = requests.get(scrape.url).text
-
     soup = BeautifulSoup(scrape.source, 'lxml')
 
     # Find song name and artist
@@ -95,7 +100,6 @@ def scrape(url=None):
     scrape.lyrics = lyrics.find('p').text
     scrape.header = '%s by %s' % (scrape.songname, scrape.artist)
     scrape.valid = True
-
     scrape.link = watch(find.searchterm)
     scrape.link = f'\n\nWatch now at: {scrape.link}'
 
@@ -116,11 +120,8 @@ def scrape(url=None):
     while scrape.again not in ['1', '2']:
         scrape.again = input("'%s' is an invalid answer. Please try again. " % (scrape.again))
 
-    if scrape.again == '1':
-        start()
-
-    elif scrape.again == '2':
-        sys.exit()
+    if scrape.again == '1': start()
+    elif scrape.again == '2': sys.exit()
 
 def start():
     search = input('What song would you like to find the lyrics for today? ')
