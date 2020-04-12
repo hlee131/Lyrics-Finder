@@ -11,21 +11,14 @@ from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 
-
 options = Options()
 options.headless = True
 options.add_argument('--log-level=3')
 chromepath = str(Path(os.getcwd()).parent) + r'\chromedriver.exe'
-driver = webdriver.Chrome(chromepath, options=options)
+driver = webdriver.Chrome(executable_path=chromepath, options=options)
 
 def watch(searchterm):
     """Finds youtube link for song"""
-    options = Options()
-    options.headless = False
-    options.add_argument("--log-level=3")
-    chromepath = os.getcwd() + r'\chromedriver.exe'
-    driver = webdriver.Chrome(chromepath, options=options)
-
     search = searchterm.split()
     search = '+'.join(search)
     link = f'https://www.youtube.com/results?search_query={search}'
@@ -51,7 +44,15 @@ def find(searchterm):
     print(query)
     driver.get(query)
 
-    panels = driver.find_element_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]""")
+    try:
+        panels = driver.find_element_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]""")
+
+    except:
+        answer = input("Sorry, we couldn't find anything for your search term, would you like to try another song[1],\nor quit[2]?")
+
+        if answer == '1': start()
+        elif answer == '2': sys.exit()
+    
     songs = panels.find_elements_by_xpath(""".//div[@class='mini_card-title']""")
     artists = panels.find_elements_by_xpath(""".//div[@class='mini_card-subtitle']""")
     link = panels.find_elements_by_xpath("""/html/body/routable-page/ng-outlet/search-results-page/div/div[2]/div[1]/div[2]/search-result-section/div/div[2]/search-result-items/div/search-result-item/div/mini-song-card/a""")
@@ -72,11 +73,8 @@ def find(searchterm):
     if len(options) == 0:
         answer = input("Sorry, we couldn't find anything for your search term, would you like to try another song[1],\nor quit[2]?")
 
-        if answer == '1':
-            start()
-
-        elif answer == '2':
-            sys.exit()
+        if answer == '1': start()
+        elif answer == '2': sys.exit()
     else:
         selection = int(input('Please choose one of the options with a number from 1-%s. ' % (str(numoptions))))
 
@@ -84,8 +82,8 @@ def find(searchterm):
             selection = int(input('Please choose one of the options with a number from 1-%s.' % (str(numoptions))))
 
         find.selected = values[int(selection) - 1]
-
         scrape(urls[int(selection) - 1])
+        driver.quit()
     
 def scrape(url=None):
     """Finds the lyrics of the song selected in the find function"""
