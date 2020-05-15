@@ -1,13 +1,22 @@
 """Main file for Lyrics-Finder project, allows you to select azlyrics.com or genius.com as source"""
 import sys
 
-lyric_source = input('Would you like to use azlyrics.com [1] or genius.com? [2] ')
-while lyric_source not in ['1', '2']:
-    lyric_source = input('Please use either 1 or 2 to denote your answer. ')
+from spotify import get_info_windows
+
+
 
 
 def start():
     """Main function of file, executes searches based on preference"""
+    if get_info_windows() not in ['Spotify not running', 'Spotify paused']:
+        response = input('Would you like to connect to spotify? ')
+        while response not in ['y', 'n']:
+            response = input('Please use y or n. ')
+
+    lyric_source = input('Would you like to use azlyrics.com [1] or genius.com? [2] ')
+    while lyric_source not in ['1', '2']:
+        lyric_source = input('Please use either 1 or 2 to denote your answer. ')
+        
     if lyric_source == '1':
         from lyricsources import azlyricscom
         search = input('What song would you like to find the lyrics for today? ')

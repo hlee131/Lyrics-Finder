@@ -2,6 +2,12 @@
 
 Lyrics Finder uses www.azlyrics.com to find lyrics for various songs. This is a project to practice webscraping and using GitHub. 
 
+## Dependencies
+- Selenium (put chromedriver in parent folder)
+- Beautiful Soup
+- lxml
+- requests
+
 ## To- Do List 
 1. Search function that searches the website for unknown songs. (DONE)
 2. Multiple lyric sources (DONE)
